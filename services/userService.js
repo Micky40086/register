@@ -1,5 +1,3 @@
-import * as userHelper from '../helpers/userHelper';
-
 export const createUser = async (userObj) => {
   const user = await createUserToDatabase(userObj);
   sendRegisterMail(user.email);

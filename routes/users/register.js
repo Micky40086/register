@@ -28,11 +28,9 @@ router.get('/google', function(req, res, next) {
     user = userService.checkUserExistByEmail(profileRes.email)
 
     if (user) {
-      token = await userService.generateUserAuthToken(user.userId);
-    } else {
       user = await userService.createUserByGoogle(profileRes);
-      token = await userService.generateUserAuthToken(user.userId);
     }
+    token = await userService.generateUserAuthToken(user.userId);
     res.send({token});
   }).catch(errorMessage => {
     res.send({error: errorMessage});
@@ -49,12 +47,10 @@ router.get('/facebook', async function(req, res, next) {
       facebookApi.getUserInfo(tokenRes.access_token).then(async profileRes => {
         user = userService.checkUserExistByEmail(profileRes.email)
 
-        if (user) {
-          token = await userService.generateUserAuthToken(user.userId);
-        } else {
+        if (!user) {
           user = await userService.createUserByFacebook(profileRes);
-          token = await userService.generateUserAuthToken(user.userId);
         }
+        token = await userService.generateUserAuthToken(user.userId);
         res.send({token});
       })
     }
