@@ -18,9 +18,14 @@ function validateEmail(email) {
   return re.test(String(email).toLowerCase());
 }
 
-function userIsExist(email) {
+export function userIsExist(email) {
   // check with database
   return true
+}
+
+export const regeneratorUserAuthToken = (email) => {
+  // regenarator auth token
+  return "regenerateToken"
 }
 
 function passwordLengthCheck(password) {
