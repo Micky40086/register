@@ -27,7 +27,7 @@ router.get('/google', function(req, res, next) {
   googleApi.getUserInfo(accessToken).then(async profileRes => {
     user = userService.checkUserExistByEmail(profileRes.email)
 
-    if (user) {
+    if (!user) {
       user = await userService.createUserByGoogle(profileRes);
     }
     token = await userService.generateUserAuthToken(user.userId);
