@@ -10,7 +10,8 @@ router.post('/', async function(req, res, next) {
   try {
     // userIsValidate throw error if false
     if (userHelper.userIsValidate(req.body.user)) {
-      const token = await userService.createUser(req.body.user);
+      const user = await userService.createUser(req.body.user);
+      const token = await userService.generateUserAuthToken(user.email);
       res.send({token});
     }
   } catch (errorMessage) {
@@ -20,15 +21,15 @@ router.post('/', async function(req, res, next) {
 
 router.get('/google', function(req, res, next) {
   const accessToken = req.query.accessToken;
+  let token = "";
 
   googleApi.getUserInfo(accessToken).then(async profileRes => {
     if (userHelper.userIsExist(profileRes.email)) {
-      const token = await userService.generateUserAuthToken(profileRes.email);
-      res.send({token});
+      token = await userService.generateUserAuthToken(profileRes.email);
     } else {
-      const token = await userService.createUser(req.body.user);
-      res.send({token});
+      token = await userService.createUser(req.body.user);
     }
+    res.send({token});
   }).catch(errorMessage => {
     res.send({error: errorMessage});
   })
@@ -36,17 +37,17 @@ router.get('/google', function(req, res, next) {
 
 router.get('/facebook', async function(req, res, next) {
   const code = req.query.code;
+  let token = "";
 
   facebookApi.getAccessToken(code).then(tokenRes => {
     if (tokenRes.access_token) {
       facebookApi.getUserInfo(tokenRes.access_token).then(async profileRes => {
         if (userHelper.userIsExist(profileRes.email)) {
-          const token = await userService.generateUserAuthToken(profileRes.email);
-          res.send({token});
+          token = await userService.generateUserAuthToken(profileRes.email);
         } else {
-          const token = await userService.createUser(req.body.user);
-          res.send({token});
+          token = await userService.createUser(req.body.user);
         }
+        res.send({token});
       })
     }
   }).catch(errorMessage => {

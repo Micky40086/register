@@ -3,7 +3,7 @@ export const createUser = async (userObj) => {
   const user = await createUserToDatabase(userObj);
   sendRegisterMail(user.email);
   addCouponToUser(user.email);
-  return generateUserAuthToken(user.email)
+  return user;
 };
 
 const createUserToDatabase = (userObj) => {
@@ -25,5 +25,5 @@ const addCouponToUser = (email) => {
 
 export const generateUserAuthToken = async (email) => {
   // regenarator auth token
-  return "generateToken"
+  return "generateToken";
 };
