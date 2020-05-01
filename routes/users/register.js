@@ -4,16 +4,15 @@ var router = express.Router();
 import * as userHelper from '../../helpers/userHelper';
 import * as googleApi from '../../services/google';
 import * as facebookApi from '../../services/facebook';
+import * as userService from '../../services/userService';
 
-router.post('/', function(req, res, next) {
+router.post('/', async function(req, res, next) {
   try {
+    // userIsValidate throw error if false
     if (userHelper.userIsValidate(req.body.user)) {
-      // createUser to Database
-      // call mail api (sendgird, smtp)
-      // create coupon with userId
-      token = userHelper.regeneratorUserAuthToken(req.body.user.email);
+      const token = await userService.createUser(req.body.user);
+      res.send({token});
     }
-    res.send({token});
   } catch (errorMessage) {
     res.send({error: errorMessage});
   };
@@ -22,16 +21,12 @@ router.post('/', function(req, res, next) {
 router.get('/google', function(req, res, next) {
   const accessToken = req.query.accessToken;
 
-  googleApi.getUserInfo(accessToken).then(profileRes => {
+  googleApi.getUserInfo(accessToken).then(async profileRes => {
     if (userHelper.userIsExist(profileRes.email)) {
-      // regenarator auth token
-      token = userHelper.regeneratorUserAuthToken(profileRes.email);
+      const token = await userService.generateUserAuthToken(profileRes.email);
       res.send({token});
     } else {
-      // createUser to Database
-      // call mail api (sendgird, smtp)
-      // create coupon with userId
-      token = userHelper.regeneratorUserAuthToken(profileRes.email);
+      const token = await userService.createUser(req.body.user);
       res.send({token});
     }
   }).catch(errorMessage => {
@@ -39,21 +34,17 @@ router.get('/google', function(req, res, next) {
   })
 });
 
-router.get('/facebook', function(req, res, next) {
+router.get('/facebook', async function(req, res, next) {
   const code = req.query.code;
 
   facebookApi.getAccessToken(code).then(tokenRes => {
     if (tokenRes.access_token) {
-      facebookApi.getUserInfo(tokenRes.access_token).then(profileRes => {
+      facebookApi.getUserInfo(tokenRes.access_token).then(async profileRes => {
         if (userHelper.userIsExist(profileRes.email)) {
-          // regenarator auth token
-          token = userHelper.regeneratorUserAuthToken(profileRes.email);
+          const token = await userService.generateUserAuthToken(profileRes.email);
           res.send({token});
         } else {
-          // createUser to Database
-          // call mail api (sendgird, smtp)
-          // create coupon with userId
-          token = userHelper.regeneratorUserAuthToken(profileRes.email);
+          const token = await userService.createUser(req.body.user);
           res.send({token});
         }
       })

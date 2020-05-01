@@ -20,12 +20,7 @@ function validateEmail(email) {
 
 export function userIsExist(email) {
   // check with database
-  return true
-}
-
-export const regeneratorUserAuthToken = (email) => {
-  // regenarator auth token
-  return "regenerateToken"
+  return false
 }
 
 function passwordLengthCheck(password) {
