@@ -1,9 +1,9 @@
-
+import * as userService from '../services/userService';
 
 export const userIsValidate = (userObj) => {
   if (!validateEmail(userObj.email)) {
     throw "Email is not validate";
-  } else if (userIsExist(userObj.email)) {
+  } else if (userService.checkUserExistByEmail(userObj.email)) {
     throw "Email is be register";
   } else if (!passwordLengthCheck(userObj.password)) {
     throw "Password length less than 8";
@@ -16,11 +16,6 @@ export const userIsValidate = (userObj) => {
 function validateEmail(email) {
   var re = /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
   return re.test(String(email).toLowerCase());
-}
-
-export function userIsExist(email) {
-  // check with database
-  return false
 }
 
 function passwordLengthCheck(password) {

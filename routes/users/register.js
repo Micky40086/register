@@ -11,7 +11,7 @@ router.post('/', async function(req, res, next) {
     // userIsValidate throw error if false
     if (userHelper.userIsValidate(req.body.user)) {
       const user = await userService.createUser(req.body.user);
-      const token = await userService.generateUserAuthToken(user.email);
+      const token = await userService.generateUserAuthToken(user.userId);
       res.send({token});
     }
   } catch (errorMessage) {
@@ -21,13 +21,17 @@ router.post('/', async function(req, res, next) {
 
 router.get('/google', function(req, res, next) {
   const accessToken = req.query.accessToken;
+  let user = null;
   let token = "";
 
   googleApi.getUserInfo(accessToken).then(async profileRes => {
-    if (userHelper.userIsExist(profileRes.email)) {
-      token = await userService.generateUserAuthToken(profileRes.email);
+    user = userService.checkUserExistByEmail(profileRes.email)
+
+    if (user) {
+      token = await userService.generateUserAuthToken(user.userId);
     } else {
-      token = await userService.createUser(req.body.user);
+      user = await userService.createUserByGoogle(profileRes);
+      token = await userService.generateUserAuthToken(user.userId);
     }
     res.send({token});
   }).catch(errorMessage => {
@@ -37,15 +41,19 @@ router.get('/google', function(req, res, next) {
 
 router.get('/facebook', async function(req, res, next) {
   const code = req.query.code;
+  let user = null;
   let token = "";
 
   facebookApi.getAccessToken(code).then(tokenRes => {
     if (tokenRes.access_token) {
       facebookApi.getUserInfo(tokenRes.access_token).then(async profileRes => {
-        if (userHelper.userIsExist(profileRes.email)) {
-          token = await userService.generateUserAuthToken(profileRes.email);
+        user = userService.checkUserExistByEmail(profileRes.email)
+
+        if (user) {
+          token = await userService.generateUserAuthToken(user.userId);
         } else {
-          token = await userService.createUser(req.body.user);
+          user = await userService.createUserByFacebook(profileRes);
+          token = await userService.generateUserAuthToken(user.userId);
         }
         res.send({token});
       })
